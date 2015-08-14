@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+
+GIT=`which git`
+
+
+version() {
+  echo "git-get git plugin v1"
+  echo
+}
+
+usage() {
+  echo "usage: git get <repo> [<root>]"
+  echo
+}
+
+main() {
+  if [ "$#" -lt 1 ]; then
+    usage; exit 1
+  fi
+
+  local subcommand="$1"; shift
+  local root="$1"; shift
+
+  case $subcommand in
+      "-h"|"--help")
+          usage; exit 0
+          ;;
+      "-v"|"--version")
+          version; exit 0
+          ;;
+  esac
+
+  root=${root:-`git config --global --get git-get.root`}
+  root=${root:-~/root}
+
+  local host="$(echo $subcommand | cut -d/ -f1)"
+  local path="$(echo $subcommand | grep / | cut -d/ -f2-)"
+
+  `$GIT clone git@$host:$path.git $root/$host/$path`
+}
+
+main "$@"
